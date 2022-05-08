@@ -1,25 +1,57 @@
-export interface ITodo {
-  id: string,
-  text: string,
-  checked: boolean,
-  createAt: Date,
-  toggle(): void,
+export interface ITodoDto {
+  readonly id: string;
+  readonly text: string;
+  readonly checked: boolean;
+  readonly createAt: number;
+}
+
+export interface ITodo extends ITodoDto {
+  copyWith(option: Partial<ITodoDto>): ITodo;
+  toJson(): ITodoDto;
 }
 
 export default class Todo implements ITodo {
-  readonly id: string;
-  readonly text: string;
-  public checked: boolean;
-  readonly createAt: Date;
+  private constructor(
+    readonly id: string,
+    readonly text: string,
+    readonly checked: boolean,
+    readonly createAt: number,
+  ) {}
 
-  constructor(text: string) {
-    this.id = `${Date() + text}`;
-    this.text = text;
-    this.checked = false;
-    this.createAt = new Date();
+  copyWith(option: Partial<ITodoDto>): ITodo {
+    return new Todo(
+      option.id ?? this.id,
+      option.text ?? this.text,
+      option.checked ?? this.checked,
+      option.createAt ?? this.createAt,
+    );
   }
 
-  toggle(): void {
-    this.checked = !this.checked;
+  toJson(): ITodoDto {
+    return {
+      id: this.id,
+      text: this.text,
+      checked: this.checked,
+      createAt: this.createAt,
+    }
+  }
+
+  static fromJson(json: ITodoDto): ITodo {
+    return new Todo(
+      json.id,
+      json.text,
+      json.checked,
+      json.createAt,
+    );
+  }
+
+  static fromText(text: string): ITodo {
+    const now = Date.now();
+    return new Todo(
+      `${now}-${text}`,
+      text,
+      false,
+      now,
+    );
   }
 }
