@@ -1,55 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
+import React, { useState } from 'react';
 import './App.css';
+import { useSelector } from 'react-redux';
+import { RootState, store } from './app/store';
+import TodoService from './services/todoService';
 
 function App() {
+  const [text, setText] = useState('');
+  const todos = useSelector((state: RootState) => state.todo.todos);
+  const todoService = new TodoService(store);
+  console.log(todos);
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
+        <input onChange={(e) => setText(e.target.value)}></input>
+        <button onClick={() => todoService.addTodo(text)}>add</button>
+        <ul>
+          {todos.map(todo => <li key={todo.id}>
+            <button onClick={() => todoService.toggleTodo(todo)}>
+              {todo.checked ? <input type="checkbox" checked></input> : <input type="checkbox" ></input>}
+            </button>
+            <div>{todo.text}</div>
+          </li>)}
+        </ul>
       </header>
     </div>
   );
