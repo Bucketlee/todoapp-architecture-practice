@@ -1,26 +1,44 @@
-import React, { useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useMemo, useState } from 'react';
 import './App.css';
-import { useSelector } from 'react-redux';
-import { RootState, store } from './app/store';
+import { store } from './app/store';
 import TodoService from './services/todoService';
+import { ITodo } from './models/todo';
+import useTodoObserver from './useTodoObserver';
 
 function App() {
   const [text, setText] = useState('');
-  const todos = useSelector((state: RootState) => state.todo.todos);
-  const todoService = new TodoService(store);
-  console.log(todos);
+  const todos = useTodoObserver()
+  const todoService = useMemo(() => new TodoService(store), []);
+
+  const handleTextInputChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (e) => setText(e.target.value),
+    [],
+  );
+
+  const handleAddTodoButtonClick = useCallback(() => {
+    todoService.addTodo(text);
+  }, [text, todoService]);
+
+  const handleToggleTodoButtonClick = useCallback((todo: ITodo) => {
+    todoService.toggleTodo(todo);
+  }, [todoService]);
+
   return (
     <div className="App">
       <header className="App-header">
-        <input onChange={(e) => setText(e.target.value)}></input>
-        <button onClick={() => todoService.addTodo(text)}>add</button>
+        <input value={text} onChange={handleTextInputChange}></input>
+        <button onClick={handleAddTodoButtonClick}>add</button>
         <ul>
-          {todos.map(todo => <li key={todo.id}>
-            <button onClick={() => todoService.toggleTodo(todo)}>
-              {todo.checked ? <input type="checkbox" checked></input> : <input type="checkbox" ></input>}
-            </button>
-            <div>{todo.text}</div>
-          </li>)}
+          {todos.map(todo => (
+            <li key={todo.id}>
+              <input
+                type="checkbox"
+                checked={todo.checked}
+                onChange={() => handleToggleTodoButtonClick(todo)}
+              />
+              <div>{todo.text}</div>
+            </li>
+          ))}
         </ul>
       </header>
     </div>
